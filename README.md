@@ -1,27 +1,47 @@
-# MedicalAppFront
+## How to Run (Frontend)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.4.
+The frontend is an Angular application.  
+It can be started either locally with Node.js or using Docker Compose.
 
-## Development server
+### Option 1 — Run locally (recommended for development)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+#### Prerequisites
+- Node.js 18+ (or 20+)
+- npm (or pnpm/yarn)
 
-## Code scaffolding
+#### Install dependencies
+```bash
+npm install
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+#### Start the Angular dev server
+```bash
+npm start
+```
 
-## Build
+The application will be available at:
+- http://localhost:4200
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-## Running unit tests
+---
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Option 2 — Run with Docker Compose
 
-## Running end-to-end tests
+#### Prerequisites
+- Docker
+- Docker Compose
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+#### Start the container
+From the directory docker that contains the `docker-compose.yml` file:
 
-## Further help
+```bash
+docker compose up --build
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The application will be available at:
+- http://localhost:4200
+
+#### Stop the container
+```bash
+docker compose down
+```
