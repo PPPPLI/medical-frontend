@@ -1,0 +1,139 @@
+<form class="space-y-3" [formGroup]="form">
+
+    <div class="mb-1">
+        <h1 class="text-2xl font-semibold">Create your account</h1>
+        <p class="text-sm text-base-content/70 mt-1">Sign up to continue.</p>
+    </div>
+
+    @if (serverError()) {
+        <div role="alert" class="alert alert-error rounded-2xl py-2">
+            <span class="text-sm">{{ serverError() }}</span>
+        </div>
+    }
+
+    <div class="form-control gap-0.5">
+        <label class="label py-0 flex items-center justify-between">
+            <span class="label-text text-sm">Username</span>
+            <span class="tooltip tooltip-left" data-tip="3–20 chars. Letters/numbers/_ only.">
+                <button type="button" class="btn btn-ghost btn-xs btn-circle" aria-label="Username requirements">?</button>
+            </span>
+        </label>
+
+        <input
+            type="text"
+            class="input input-bordered input-sm rounded-xl"
+            placeholder="e.g. pei_liu"
+            formControlName="userName"
+            autocomplete="username"
+            [class.input-error]="showUserNameError()"
+        />
+
+        <div class="min-h-5">
+            @if (showUserNameError()) {
+                <p class="text-xs text-error">{{ userNameErrorText() }}</p>
+            } @else {
+                <p class="text-xs text-base-content/60">Letters, numbers, or underscore.</p>
+            }
+        </div>
+    </div>
+
+    <div class="form-control gap-0.5">
+        <label class="label py-0 flex items-center justify-between">
+            <span class="label-text text-sm">Email</span>
+            <span class="tooltip tooltip-left" data-tip="example@mail.com">
+                <button type="button" class="btn btn-ghost btn-xs btn-circle" aria-label="Email requirements">?</button>
+            </span>
+        </label>
+
+        <input
+            type="email"
+            class="input input-bordered input-sm rounded-xl"
+            placeholder="example@mail.com"
+            formControlName="userEmail"
+            autocomplete="email"
+            [class.input-error]="showEmailError()"
+        />
+
+        <div class="min-h-5">
+            @if (showEmailError()) {
+                <p class="text-xs text-error">{{ emailErrorText() }}</p>
+            } @else {
+                <p class="text-xs text-base-content/60">We’ll never share your email.</p>
+            }
+        </div>
+    </div>
+
+    <div class="form-control gap-0.5">
+        <label class="label py-0 flex items-center justify-between">
+            <span class="label-text text-sm">Password</span>
+            <span class="tooltip tooltip-left" data-tip="8+ chars. Uppercase, lowercase, number.">
+                <button type="button" class="btn btn-ghost btn-xs btn-circle" aria-label="Password requirements">?</button>
+            </span>
+        </label>
+
+        <div class="relative">
+            <input
+                [type]="showPassword() ? 'text' : 'password'"
+                class="input input-bordered input-sm rounded-xl w-full pr-14"
+                placeholder="••••••••"
+                formControlName="userPassword"
+                autocomplete="new-password"
+                [class.input-error]="showPasswordError()"
+            />
+
+            <button
+                type="button"
+                class="btn btn-ghost btn-xs absolute right-2 top-1/2 -translate-y-1/2"
+                (click)="showPassword.set(!showPassword())"
+            >
+                {{ showPassword() ? 'Hide' : 'Show' }}
+            </button>
+        </div>
+
+        <div class="mt-3">
+            <div class="flex items-center justify-between text-xs text-base-content/70">
+                <span>Strength</span>
+                <span class="font-medium" [class]="strengthTextClass()">
+                    {{ passwordStrengthLabel() }}
+                </span>
+            </div>
+
+            <progress
+                class="progress w-full mt-1"
+                [ngClass]="strengthClass()"
+                [value]="strengthValue()"
+                max="100"
+            ></progress>
+
+            <p class="text-xs text-base-content/60 mt-1">Tip: 12+ characters recommended.</p>
+
+            <div class="min-h-5 mt-1">
+                @if (showPasswordError()) {
+                    <p class="text-xs text-error">{{ passwordErrorText() }}</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <button
+        class="btn btn-primary w-full rounded-xl
+               enabled:shadow-md enabled:hover:shadow-lg
+               enabled:hover:brightness-105 transition"
+        type="button"
+        (click)="send()"
+        [disabled]="!canSubmit()"
+    >
+        @if (submitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+            <span>Creating...</span>
+        } @else {
+            <span>Sign Up</span>
+        }
+    </button>
+
+    <p class="text-center text-sm text-base-content/70">
+        Already have an account?
+        <a class="link link-hover link-primary" routerLink="/auth/login">Log in</a>
+    </p>
+
+</form>

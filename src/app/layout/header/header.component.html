@@ -1,0 +1,140 @@
+<div class="drawer">
+    <input id="hdr-drawer" type="checkbox" class="drawer-toggle" />
+
+    <div class="drawer-content">
+        <div class="sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-3 sm:px-4 pt-3">
+                <div
+                    class="w-full rounded-3xl border border-base-300/60 shadow-sm
+                           bg-base-100/80 backdrop-blur"
+                >
+                    <div class="navbar px-3 sm:px-4 min-h-[64px]">
+
+                        <div class="flex-none lg:hidden">
+                            <label
+                                for="hdr-drawer"
+                                aria-label="Open menu"
+                                class="btn btn-ghost btn-circle"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    class="h-6 w-6 stroke-current"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 6h16M4 12h16M4 18h16"
+                                    ></path>
+                                </svg>
+                            </label>
+                        </div>
+
+                        <div class="flex-1 lg:flex-none">
+                            <a class="btn btn-ghost rounded-2xl px-2">
+                                MedApp
+                            </a>
+                        </div>
+
+                        <div class="hidden lg:flex flex-1 justify-center">
+                            <div class="join bg-base-100/80 backdrop-blur rounded-2xl shadow-sm border border-base-300/60">
+                                <a
+                                    class="btn btn-ghost join-item rounded-2xl"
+                                    [routerLink]="'/dashboard/'+role"
+                                    routerLinkActive="btn-primary text-primary"
+                                    [routerLinkActiveOptions]="{ exact: true }"
+                                >
+                                    Dashboard
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="flex-none flex items-center gap-2 sm:gap-3">
+                            <div class="hidden sm:flex items-center gap-2">
+                                <span class="badge badge-ghost rounded-xl px-3 py-3 font-medium truncate max-w-[160px]">
+                                    {{ name }}
+                                </span>
+                                <span class="badge badge-primary badge-outline rounded-xl px-3 py-3">
+                                    {{ role }}
+                                </span>
+                            </div>
+
+                            <div class="dropdown dropdown-end">
+                                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                                    <div class="w-10 rounded-full ring-2 ring-base-300/70">
+                                        <img
+                                            alt="Avatar"
+                                            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                                        />
+                                    </div>
+                                </div>
+
+                                <ul
+                                    tabindex="0"
+                                    class="menu menu-sm dropdown-content bg-base-100 rounded-2xl z-[1] mt-3 w-56 p-2 shadow border border-base-300/60"
+                                >
+                                    <li>
+                                        <a class="justify-between">
+                                            Profile
+                                            <span class="badge badge-primary badge-outline">{{ role }}</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="justify-between" (click)="logout()">
+                                            <span class="text-error">Logout</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="drawer-side z-50">
+        <label for="hdr-drawer" aria-label="Close menu" class="drawer-overlay"></label>
+
+        <aside class="min-h-full w-80 bg-base-100 border-r border-base-300/60">
+            <div class="p-4">
+                <div class="flex items-center gap-2 select-none">
+                    MedApp
+                </div>
+
+                <div class="divider my-4"></div>
+
+                <ul class="menu menu-sm px-1">
+                    <li>
+                        <a
+                            class="rounded-xl"
+                            [routerLink]="'/dashboard/'+role"
+                            routerLinkActive="active btn-primary text-primary font-semibold"
+                            [routerLinkActiveOptions]="{ exact: true }"
+                        >
+                            Dashboard
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="divider my-4"></div>
+
+                <div class="flex items-center justify-start gap-2">
+                    <span class="badge badge-ghost rounded-xl px-3 py-3 font-medium truncate max-w-[180px]">
+                        {{ name }}
+                    </span>
+                    <span class="badge badge-primary badge-outline rounded-xl px-3 py-3">
+                        {{ role }}
+                    </span>
+                </div>
+
+                <button class="btn btn-outline btn-sm btn-error w-full rounded-2xl mt-3" (click)="logout()">
+                    Logout
+                </button>
+            </div>
+        </aside>
+    </div>
+</div>

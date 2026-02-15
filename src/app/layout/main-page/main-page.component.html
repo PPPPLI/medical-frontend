@@ -1,0 +1,16 @@
+<div
+    class="h-dvh w-full overflow-hidden
+           bg-[url('./assets/bg-db.png')] bg-cover bg-center bg-no-repeat"
+>
+    <div class="h-full w-full flex flex-col">
+        <app-header class="w-full z-50 shrink-0"></app-header>
+
+        <main class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden hide-scrollbar">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="rounded-3xl bg-base-100/60 backdrop-blur border border-base-300/50 shadow-sm p-4 sm:p-6">
+                    <router-outlet></router-outlet>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

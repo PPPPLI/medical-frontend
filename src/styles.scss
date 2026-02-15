@@ -1,1 +1,36 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base{
+
+    router-outlet{
+
+       display: contents;
+    }
+
+    tr{
+
+        @apply border-b border-gray-300
+    }
+}
+
+.main-ele{
+
+    &:hover{
+
+        .child-ele{
+
+            color: cornflowerblue;
+        }
+    }
+}
+
+/* Hide scrollbar but keep scroll */
+.hide-scrollbar {
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}

@@ -1,0 +1,320 @@
+<div class="w-full relative">
+  <div class="w-full rounded-3xl border border-base-300/60 shadow-sm bg-base-100/80 backdrop-blur p-4 sm:p-5">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-2xl sm:text-3xl font-bold text-base-content">Appointments</h1>
+        <p class="text-sm text-base-content/70 mt-1">
+          Manage your bookings and find available slots.
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <label class="input input-bordered input-sm rounded-2xl flex items-center gap-2 w-full sm:w-[280px] bg-base-100/70">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-60" viewBox="0 0 24 24" fill="none">
+            <path d="M21 21l-4.3-4.3m1.3-5.2a7 7 0 1 1-14 0a7 7 0 0 1 14 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input
+            type="text"
+            class="grow"
+            placeholder="Search doctor / clinic / specialty"
+            [value]="query()"
+            (input)="query.set(($any($event.target).value || ''))"
+          />
+        </label>
+
+        <select
+          class="select select-bordered select-sm rounded-2xl bg-base-100/70 w-full sm:w-[220px]"
+          [value]="specialty()"
+          (change)="specialty.set($any($event.target).value)"
+        >
+          @for (s of specialties(); track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+
+        <label class="btn btn-ghost btn-sm rounded-2xl border border-base-300/60 bg-base-100/60 gap-2">
+          <input
+            type="checkbox"
+            class="toggle toggle-sm"
+            [checked]="onlyAvailable()"
+            (change)="onlyAvailable.set($any($event.target).checked)"
+          />
+          <span class="text-sm">Only available</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div class="join rounded-2xl border border-base-300/60 bg-base-100/70 overflow-hidden">
+        <button
+          class="btn join-item"
+          [class.btn-primary]="activeTab() === 'MY'"
+          [class.btn-ghost]="activeTab() !== 'MY'"
+          (click)="activeTab.set('MY')"
+        >
+          My Appointments
+          <span class="badge badge-ghost ml-2">{{ upcomingCount() }}</span>
+        </button>
+
+        <button
+          class="btn join-item"
+          [class.btn-primary]="activeTab() === 'AVAILABLE'"
+          [class.btn-ghost]="activeTab() !== 'AVAILABLE'"
+          (click)="activeTab.set('AVAILABLE')"
+        >
+          Available
+          <span class="badge badge-ghost ml-2">{{ filteredAvailByDate().length }}</span>
+        </button>
+      </div>
+
+      <div class="text-xs text-base-content/60">
+        Tip: filter by specialty to quickly find doctors.
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ 这里开始：让 MY tab 左右等高 + 超出滚动 -->
+  <div class="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+    @if (activeTab() === 'MY') {
+      <section class="lg:col-span-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+          <!-- LEFT -->
+          <div class="lg:col-span-5 h-full">
+            <div
+              class="h-full max-h-[calc(100vh-260px)]
+                     rounded-3xl border border-base-300/60 shadow-sm
+                     bg-base-100/80 backdrop-blur p-4 sm:p-5
+                     flex flex-col"
+            >
+              <div class="flex items-center justify-between shrink-0">
+                <h2 class="text-lg font-semibold">My Appointments</h2>
+                @if (loadingMy()) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                }
+              </div>
+
+              <div class="mt-3 space-y-3 flex-1 overflow-auto pr-1">
+                @if (filteredMy().length === 0) {
+                  <div class="p-4 rounded-2xl bg-base-200/60 text-sm text-base-content/70">
+                    No appointments found.
+                  </div>
+                } @else {
+                  @for (a of filteredMy(); track a.appointmentId) {
+                    <div class="p-4 rounded-2xl border border-base-300/60 bg-base-100/60">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <div class="flex items-center gap-2 min-w-0">
+                            <h3 class="font-semibold truncate">{{ a.doctorDto.doctorName }}</h3>
+                            <span [class]="statusBadgeClass(a.status!)" class="shrink-0 whitespace-nowrap">
+                              {{ a.status }}
+                            </span>
+                          </div>
+
+                          <p class="text-sm text-base-content/70 mt-1 truncate">
+                            {{ a.doctorDto.doctorSpecialty! }} · {{ a.doctorDto.cabinetName! }}
+                          </p>
+
+                          <p class="text-sm mt-2">
+                            <span class="badge badge-ghost rounded-xl whitespace-nowrap">
+                              {{ formatDT(a.startAt) }}
+                            </span>
+                          </p>
+                        </div>
+
+                        @if (a.status?.toString() === 'RESERVED') {
+                          <button
+                            class="btn btn-outline btn-error btn-sm rounded-2xl shrink-0"
+                            (click)="cancel(a.appointmentId ?? '')"
+                            [disabled]="loadingMy()"
+                          >
+                            Cancel
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT -->
+          <div class="lg:col-span-7 h-full">
+            <div
+              class="h-full max-h-[calc(100vh-260px)]
+                     rounded-3xl border border-base-300/60 shadow-sm
+                     bg-base-100/80 backdrop-blur p-4 sm:p-5
+                     flex flex-col"
+            >
+              <div class="flex items-center justify-between shrink-0">
+                <h2 class="text-lg font-semibold">Book a New Appointment</h2>
+                <button class="btn btn-primary btn-sm rounded-2xl" (click)="activeTab.set('AVAILABLE')">
+                  Browse slots
+                </button>
+              </div>
+
+              <div class="mt-3 flex-1 overflow-auto pr-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div class="p-4 rounded-2xl bg-base-200/60 border border-base-300/40">
+                    <p class="text-sm font-semibold">Quick filters</p>
+                    <p class="text-sm text-base-content/70 mt-2">
+                      Use Specialty + Search to find your doctor faster.
+                    </p>
+                  </div>
+
+                  <div class="p-4 rounded-2xl bg-base-200/60 border border-base-300/40">
+                    <p class="text-sm font-semibold">Next steps</p>
+                    <p class="text-sm text-base-content/70 mt-2">
+                      Book a slot. You’ll see it instantly in “My Appointments”.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <h3 class="text-sm font-semibold text-base-content/80">Top available doctors</h3>
+
+                  <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    @for (d of filteredAvailByDate().slice(0, 4); track d.doctorId) {
+                      <div class="p-4 rounded-2xl border border-base-300/60 bg-base-100/60">
+                        <div class="flex items-start justify-between gap-3">
+                          <div class="min-w-0 flex-1">
+                            <p class="font-semibold truncate">{{ d.doctorName }}</p>
+
+                            <p class="text-sm text-base-content/70 mt-1 truncate">
+                              {{ d.specialty }} · {{ d.clinic }}
+                            </p>
+
+                            <div class="mt-2 flex items-center gap-2 flex-wrap min-w-0">
+                              <span class="badge badge-primary badge-outline rounded-xl min-w-0 max-w-[190px]">
+                                <span class="truncate block">
+                                  Next: {{ formatDT(d.nextAvailableAt) }}
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+
+                          <button class="btn btn-primary btn-sm rounded-2xl shrink-0" (click)="activeTab.set('AVAILABLE')">
+                            Book
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    } @else {
+      <section class="lg:col-span-12">
+        <div class="rounded-3xl border border-base-300/60 shadow-sm bg-base-100/80 backdrop-blur p-4 sm:p-5">
+          <!-- ✅ header + 日期选择 -->
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 class="text-lg font-semibold">Available Appointments</h2>
+
+              @if (loadingAvail()) {
+                <span class="loading loading-spinner loading-sm"></span>
+              } @else {
+                <p class="text-xs text-base-content/60 mt-1">
+                  Showing {{ filteredAvailByDate().length }} doctors for
+                  <span class="font-medium">{{ selectedDateLabel() }}</span>
+                </p>
+              }
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label class="text-xs text-base-content/60">Date</label>
+              <input
+                type="date"
+                class="input input-bordered input-sm rounded-2xl bg-base-100/70"
+                [value]="selectedDateISO()"
+                (change)="onDateChange($any($event.target).value)"
+              />
+
+              <button
+                class="btn btn-ghost btn-sm rounded-2xl border border-base-300/60 bg-base-100/60"
+                (click)="resetDateToToday()"
+                type="button"
+              >
+                Today
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            @if (filteredAvailByDate().length === 0) {
+              <div class="p-4 rounded-2xl bg-base-200/60 text-sm text-base-content/70 lg:col-span-2">
+                No available doctors match your filters for the selected date.
+              </div>
+            } @else {
+              @for (d of filteredAvailByDate(); track d.doctorId) {
+                <div class="p-4 rounded-3xl border border-base-300/60 bg-base-100/60">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                      <h3 class="text-base font-semibold truncate">{{ d.doctorName }}</h3>
+
+                      <p class="text-sm text-base-content/70 mt-1 truncate">
+                        {{ d.specialty }} · {{ d.clinic }}
+                      </p>
+
+                      <div class="mt-2 flex items-center gap-2 flex-wrap min-w-0">
+                        <span class="badge badge-primary badge-outline rounded-xl min-w-0 max-w-[220px]">
+                          <span class="truncate block">
+                            Next: {{ formatDT(d.nextAvailableAt) }}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                      <span class="badge badge-ghost rounded-xl whitespace-nowrap">{{ d.slots.length }} slots</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4">
+                    <div class="flex flex-wrap gap-2 h-40 overflow-auto pr-1">
+                      @for (s of d.slots; track s.id) {
+                        <button
+                          class="btn btn-sm rounded-2xl border border-base-300/60 bg-base-100/70 hover:bg-base-200/70"
+                          (click)="book(d.doctorId, s)"
+                          [disabled]="loadingAvail()"
+                        >
+                          <span class="font-medium">{{ formatDT(s.startAt) }}</span>
+                          <span class="opacity-70 ml-2">· {{ s.durationMin }}m</span>
+                          @if (s.priceEUR) {
+                            <span class="opacity-70 ml-2">· €{{ s.priceEUR }}</span>
+                          }
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+  @if(showWarning){
+    <div role="alert" class="alert alert-error absolute top-0">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 shrink-0 stroke-white"
+                fill="none"
+                viewBox="0 0 24 24">
+                <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-white">{{ warningMessage }}</span>
+        </div>
+  }
+
+</div>

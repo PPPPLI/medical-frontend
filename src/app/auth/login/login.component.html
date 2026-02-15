@@ -1,0 +1,107 @@
+<form class="space-y-3" [formGroup]="form">
+
+    <div class="mb-1">
+        <h1 class="text-2xl font-semibold">Welcome back</h1>
+        <p class="text-sm text-base-content/70 mt-1">Sign in to continue.</p>
+    </div>
+
+    @if (serverError()) {
+        <div role="alert" class="alert alert-error rounded-2xl py-2">
+            <span class="text-sm text-white">{{ serverError() }}</span>
+        </div>
+    }
+
+    <div class="form-control gap-0.5">
+        <label class="label py-0 flex items-center justify-between">
+            <span class="label-text text-sm">Email or Username</span>
+            <span class="tooltip tooltip-left" data-tip="Use the email or username you registered with.">
+                <button type="button" class="btn btn-ghost btn-xs btn-circle" aria-label="Email help">?</button>
+            </span>
+        </label>
+
+        <input
+            type="text"
+            placeholder="Username or email address"
+            class="input input-bordered input-sm rounded-xl"
+            formControlName="userEmail"
+            autocomplete="username"
+            [class.input-error]="showEmailError()"
+        />
+
+        <div class="min-h-5">
+            @if (showEmailError()) {
+                <p class="text-xs text-error">{{ emailErrorText() }}</p>
+            }
+        </div>
+    </div>
+
+    <div class="form-control gap-0.5">
+        <label class="label py-0 flex items-center justify-between">
+            <span class="label-text text-sm">Password</span>
+            <span class="tooltip tooltip-left" data-tip="Enter your account password.">
+                <button type="button" class="btn btn-ghost btn-xs btn-circle" aria-label="Password help">?</button>
+            </span>
+        </label>
+
+        <div class="relative">
+            <input
+                [type]="showPassword() ? 'text' : 'password'"
+                placeholder="••••••••"
+                class="input input-bordered input-sm rounded-xl w-full pr-14"
+                formControlName="userPassword"
+                autocomplete="current-password"
+                [class.input-error]="showPasswordError()"
+            />
+
+            <button
+                type="button"
+                class="btn btn-ghost btn-xs absolute right-2 top-1/2 -translate-y-1/2"
+                (click)="showPassword.set(!showPassword())"
+            >
+                {{ showPassword() ? 'Hide' : 'Show' }}
+            </button>
+        </div>
+
+        <div class="flex items-center justify-between mt-1">
+            <label class="label cursor-pointer py-0 gap-2">
+                <input type="checkbox" class="checkbox checkbox-sm" formControlName="rememberMe" />
+                <span class="label-text text-sm">Remember me</span>
+            </label>
+
+            <a
+                routerLink="/auth/forgot-password"
+                class="text-sm link link-hover link-primary font-medium"
+            >
+                Forgot password?
+            </a>
+        </div>
+
+        <div class="min-h-5 mt-1">
+            @if (showPasswordError()) {
+                <p class="text-xs text-error">{{ passwordErrorText() }}</p>
+            }
+        </div>
+    </div>
+
+    <button
+        class="btn btn-primary w-full rounded-xl
+               enabled:shadow-md enabled:hover:shadow-lg
+               enabled:hover:brightness-105 transition"
+        type="button"
+        (click)="send()"
+        [disabled]="!canSubmit()"
+    >
+        @if (submitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+            <span>Signing in...</span>
+        } @else {
+            <span>Sign In</span>
+        }
+    </button>
+
+    <p class="text-center text-sm text-base-content/70">
+        Don’t have an account?
+        <a class="link link-hover link-primary" routerLink="/auth/register">Create one</a>
+    </p>
+
+</form>

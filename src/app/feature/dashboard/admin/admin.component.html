@@ -1,0 +1,172 @@
+<div class="w-full">
+  <!-- Header Card -->
+  <div class="w-full rounded-3xl border border-base-300/60 shadow-sm bg-base-100/80 backdrop-blur p-4 sm:p-5">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-2xl sm:text-3xl font-bold text-base-content">Admin</h1>
+        <p class="text-sm text-base-content/70 mt-1">
+          Manage users: search, freeze and unfreeze accounts.
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <label class="input input-bordered input-sm rounded-2xl flex items-center gap-2 w-full sm:w-[320px] bg-base-100/70">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-60" viewBox="0 0 24 24" fill="none">
+            <path d="M21 21l-4.3-4.3m1.3-5.2a7 7 0 1 1-14 0a7 7 0 0 1 14 0Z"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input
+            type="text"
+            class="grow"
+            placeholder="Search by username or email"
+            [value]="query()"
+            (input)="query.set(($any($event.target).value || ''))"
+          />
+          @if (query()) {
+            <button class="btn btn-ghost btn-xs rounded-xl" type="button" (click)="query.set('')">Clear</button>
+          }
+        </label>
+
+        <button class="btn btn-ghost btn-sm rounded-2xl border border-base-300/60 bg-base-100/60"
+                type="button"
+                (click)="reload()"
+                [disabled]="loading()">
+          @if (loading()) {
+            <span class="loading loading-spinner loading-xs"></span>
+          } @else {
+            <span>Refresh</span>
+          }
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-4 flex items-center justify-between">
+      <div class="text-xs text-base-content/60">
+        @if (loading()) {
+          Loading users…
+        } @else {
+          Showing {{ filteredUsers().length }} / {{ users().length }} users
+        }
+      </div>
+
+      <div class="flex items-center gap-2">
+        <label class="btn btn-ghost btn-sm rounded-2xl border border-base-300/60 bg-base-100/60 gap-2">
+          <input
+            type="checkbox"
+            class="toggle toggle-sm"
+            [checked]="showFrozenOnly()"
+            (change)="showFrozenOnly.set($any($event.target).checked)"
+          />
+          <span class="text-sm">Frozen only</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- List Card -->
+  <div class="mt-4 rounded-3xl border border-base-300/60 shadow-sm bg-base-100/80 backdrop-blur p-4 sm:p-5">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold">Users</h2>
+
+      @if (errorMsg()) {
+        <span class="text-xs text-error">{{ errorMsg() }}</span>
+      }
+    </div>
+
+    <div class="mt-4">
+      @if (loading()) {
+        <div class="p-4 rounded-2xl bg-base-200/60 text-sm text-base-content/70 flex items-center gap-3">
+          <span class="loading loading-spinner loading-sm"></span>
+          Fetching user list…
+        </div>
+      } @else if (filteredUsers().length === 0) {
+        <div class="p-4 rounded-2xl bg-base-200/60 text-sm text-base-content/70">
+          No users match your search.
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+              <tr class="text-base-content/70">
+                <th>User</th>
+                <th>Email</th>
+                <th class="hidden md:table-cell">Role</th>
+                <th>Status</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (u of filteredUsers(); track u.userId) {
+                <tr class="hover">
+                  <td class="min-w-[220px]">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="avatar placeholder">
+                        <div class="bg-base-200 text-base-content rounded-2xl w-9 h-9">
+                          <span class="text-xs font-semibold">
+                            {{ initials(u.userName!) }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="min-w-0">
+                        <div class="font-semibold truncate">{{ u.userName }}</div>
+                        <div class="text-xs text-base-content/60 truncate">ID: {{ u.userId }}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="min-w-[220px]">
+                    <span class="truncate block">{{ u.userEmail }}</span>
+                  </td>
+
+                  <td class="hidden md:table-cell">
+                    <span class="badge badge-ghost rounded-xl">{{ u.role }}</span>
+                  </td>
+
+                  <td>
+                    @if (u.enabled === false) {
+                      <span class="badge badge-error badge-outline rounded-xl whitespace-nowrap">FROZEN</span>
+                    } @else {
+                      <span class="badge badge-success badge-outline rounded-xl whitespace-nowrap">ACTIVE</span>
+                    }
+                  </td>
+
+                  <td class="text-right">
+                    @if (u.enabled === false) {
+                      <button
+                        class="btn btn-outline btn-success btn-sm rounded-2xl"
+                        type="button"
+                        [disabled]="isToggling(u.userId!)"
+                        (click)="toggleFreeze(u)"
+                      >
+                        @if (isToggling(u.userId!)) {
+                          <span class="loading loading-spinner loading-xs"></span>
+                        } @else {
+                          Unfreeze
+                        }
+                      </button>
+                    } @else {
+                      <button
+                        class="btn btn-outline btn-error btn-sm rounded-2xl"
+                        type="button"
+                        [disabled]="isToggling(u.userId!)"
+                        (click)="toggleFreeze(u)"
+                      >
+                        @if (isToggling(u.userId!)) {
+                          <span class="loading loading-spinner loading-xs"></span>
+                        } @else {
+                          Freeze
+                        }
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>
